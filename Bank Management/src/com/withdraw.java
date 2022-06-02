@@ -23,6 +23,8 @@ import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.sql.PreparedStatement;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.awt.event.ActionEvent;
 
 public class withdraw extends JFrame {
@@ -51,7 +53,32 @@ public class withdraw extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	Connection con = null;
+	static Connection con = null;
+	public static void DBop(int account,int amount) {
+		con = (Connection) MysqlCon.dbconnect();
+		try {
+			PreparedStatement pst = con.prepareStatement("select amount from deposit where account_no ="+account);
+			ResultSet rs = (ResultSet) pst.executeQuery();
+			while (rs.next())
+		    {
+		       int  amount1= rs.getInt("amount");
+//		         System.out.print(amount1);
+		         if(amount<=amount1) {
+		        	 PreparedStatement pst12 = con.prepareStatement("update deposit set amount="+(amount1-amount)+" where account_no ="+account);
+		        	 pst12.executeUpdate();
+		        	 JOptionPane.showMessageDialog(null, "Your money withdrown successfully Remaining balence is="+ (amount1-amount)); 
+		        	 
+		         }else {
+		        	 JOptionPane.showMessageDialog(null, "Unsufficient Balence !!!"); 
+		        	 
+		         }
+		         
+		    }
+		}catch(Exception e) {
+			System.out.print(e);
+		}
+		
+	}
 	public withdraw() {
 		con = (Connection) MysqlCon.dbconnect();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -92,25 +119,34 @@ public class withdraw extends JFrame {
 		JButton withdrawbtn = new JButton("Withdraw");
 		withdrawbtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				String accountNo = withdrawac.getText();
-				int Orgamount = Integer.parseInt(amount.getText());
-				try {
-					PreparedStatement pst = con.prepareStatement("select amount from deposit where account_no ="+accountNo);
-					ResultSet rs = (ResultSet) pst.executeQuery();
-					while (rs.next())
-				    {
-				       int  amount1= rs.getInt("amount");
-				         System.out.print(amount1);
-				         if(Orgamount<=amount1) {
-				        	 PreparedStatement pst12 = con.prepareStatement("update deposit set amount="+(amount1-Orgamount)+" where account_no ="+accountNo);
-				        	 pst12.executeUpdate();
-				        	 JOptionPane.showMessageDialog(null, "Your money withdrown successfully Remaining balence is="+ (amount1-Orgamount)); 
-				        	 
-				         }
-				         
-				    }
-				}catch(Exception e) {
-					System.out.print(e);
+				String account = withdrawac.getText();
+				int val = 0;
+				
+				try {// if is number
+				    val = Integer.parseInt(amount.getText());
+				} catch (NumberFormatException e) {
+				    // else then do blah
+					JOptionPane.showMessageDialog(null, "Enter Valid Amount"); 					
+					return;
+				}
+				
+				
+//				String regex = "^[0-9]+$";
+//				 account=withdrawac.getText();
+//				Pattern pattern = Pattern.compile(regex);
+//				Matcher matcher = pattern.matcher(account);
+//				System.out.println(!matcher.matches());
+//				if(matcher.matches()) {
+//					JOptionPane.showMessageDialog(null, "Enter Valid Amount"); 					
+//					return;
+//				}else 
+				if  (val<0) {
+					JOptionPane.showMessageDialog(null, "Enter Valid Amount"); 					
+					return;
+				}else {
+					 account=withdrawac.getText();
+					 
+					 withdraw.DBop(Integer.parseInt(account),val);
 				}
 				
 			}

@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.ResultSet;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -51,7 +52,36 @@ public class pin extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	Connection con = null;
+	static Connection con = null;
+	public static void DBop(String account,String newp,String old) {
+		con = (Connection) MysqlCon.dbconnect();
+		try {
+			PreparedStatement pst = con.prepareStatement("select password from logindb where account_no ="+account);
+			ResultSet rs = (ResultSet) pst.executeQuery();
+			 while (rs.next())
+			    {
+				 String amount1=rs.getString("password");
+				 if(amount1.equals(old)) {
+					 PreparedStatement pst12 = con.prepareStatement("update logindb set password="+ newp +" where account_no ="+account );
+		        	 pst12.executeUpdate();
+	        	 JOptionPane.showMessageDialog(null, "Your password is changed successfully"+ (newp)); 
+				 }else {
+					 JOptionPane.showMessageDialog(null, "old Password is Incorrect"); 
+			    
+					 return;
+				 }
+			        
+			    }
+
+			}
+			catch(Exception e) {
+				System.out.print(e);
+				JOptionPane.showMessageDialog(null, "Unable to process Your Request");
+		         
+			}
+		
+	}
+	
 	private JTextField ac;
 	public pin() {
 		
@@ -93,16 +123,20 @@ public class pin extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 				accountp = ac.getText();
-				//String opass = old.getText();
+				String opass = old.getText();
 				newp = newpassword.getText();
+				if(newp.length()!=4) {
+					JOptionPane.showMessageDialog(null, "Password length must be 4!! "); 
+					return;
+				}
+				pin.DBop(accountp, newp,opass);
 				
-				//oldpass = 
-//				System.out.print(accountp);
+				//				System.out.print(accountp);
 //				System.out.print(opass);
 //				System.out.print(newp);
-			PreparedStatement pst12 = con.prepareStatement("update logindb set password="+ newp +" where account_no ="+accountp );
-	        	 pst12.executeUpdate();
-        	 JOptionPane.showMessageDialog(null, "Your password is changed successfully"+ (newp)); 
+//			PreparedStatement pst12 = con.prepareStatement("update logindb set password="+ newp +" where account_no ="+accountp );
+//	        	 pst12.executeUpdate();
+//        	 JOptionPane.showMessageDialog(null, "Your password is changed successfully"+ (newp)); 
 //	        	 
 			}
 				catch(Exception e5) {

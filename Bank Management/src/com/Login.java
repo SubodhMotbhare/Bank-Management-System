@@ -20,6 +20,8 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.sql.PreparedStatement;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
@@ -66,7 +68,20 @@ public class Login extends JFrame {
 	Connection con = null;
 	private JTextField tf6;
 	private JPasswordField pf1;
+	public static boolean onlyDigits(String str, int n)
+	    {
+	        for (int i = 0; i < n; i++) {
+	            if (Character.isDigit(str.charAt(i))) {
+	                return true;
+	            }
+	            else {
+	                return false;
+	            }
+	        }
+	        return false;
+	    }
 	public Login() {
+		setBackground(new Color(244, 164, 96));
 		
 		con = (Connection) MysqlCon.dbconnect();
 		
@@ -74,7 +89,7 @@ public class Login extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 733, 646);
 		contentPane = new JPanel();
-		contentPane.setBackground(Color.LIGHT_GRAY);
+		contentPane.setBackground(new Color(245, 245, 220));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
@@ -131,6 +146,8 @@ public class Login extends JFrame {
 		contentPane.add(day);
 	
 		JButton b1 = new JButton("Create");
+		b1.setBackground(new Color(102, 205, 170));
+		
 		b1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			try {
@@ -151,41 +168,40 @@ public class Login extends JFrame {
 					actype="Current";
 				
 				name = tf1.getText();
-				//System.out.print(name);
 				pan = tf2.getText();
-//				System.out.print(pan);
-//				System.out.print(Gen);
-//				System.out.print(dob);
-//				System.out.print(actype);
+				if(pan.length()!=10) {
+					JOptionPane.showMessageDialog(null, "Pan Number Must be 10 digit"); 
+					return;
+				}
 				gmail = tf4.getText();
-				//System.out.print(gmail);
+				String regex = "^(.+)@(.+)$";
+				 
+				Pattern pattern = Pattern.compile(regex);
+				Matcher matcher = pattern.matcher(gmail);
+				if(!matcher.matches()) {
+					JOptionPane.showMessageDialog(null, "Enter Valid Email Address"); 					
+					return;
+				}
 				mobile = tf5.getText();
-				//System.out.print(mobile);
-				//System.out.print(dob);
-				
+				String regexMobile = "[0-9]+";
+				Pattern patternMobile = Pattern.compile(regexMobile);
+				Matcher matcherMobile = patternMobile.matcher(mobile);
+				if(!matcherMobile.matches()) {
+					JOptionPane.showMessageDialog(null, "Number Must Contains Numbers"); 					
+					return;
+				}
+				if(mobile.length()!=10) {
+					JOptionPane.showMessageDialog(null, "Mobile Number Must be 10 digit"); 
+					return;
+				}
 				city = tf6.getText();
-				//System.out.print(city);
 				password = pf1.getText();
-//				System.out.print(password);
-				//confirm = pf2.getText();
-//				System.out.print(confirm);
-				
-				
-
-				    Random r = new Random();
-				    numbers = 1000000000 + (int)(r.nextDouble() * 999999999);
-				    //System.out.print(numbers);
-				    
-				
-
-						
-//				pass = pf1.getPassword();
-				
-				//System.out.print(Gen);
-				
-				
-				//System.out.print(actype);
-				
+				if(password.length()!=4) {
+					JOptionPane.showMessageDialog(null, "Password Must be 4 digit"); 
+					return;
+				}
+				Random r = new Random();
+				numbers = 1000000000 + (int)(r.nextDouble() * 999999999);
 				PreparedStatement pst = con.prepareStatement("Insert into logindb(name, pan, Gender, dob, actype, gmail, mobile, city, password, account_no)values(?,?,?,?,?,?,?,?,?,?)");
 				pst.setString(1, name);
 				pst.setString(2, pan);
@@ -196,7 +212,6 @@ public class Login extends JFrame {
 				pst.setString(7, mobile);
 				pst.setString(8, city);
 				pst.setString(9, password);
-				//pst.setString(10, confirm);
 				pst.setInt(10, numbers);
 				pst.executeUpdate();
 				PreparedStatement pst12 = con.prepareStatement("Insert into deposit values(?,?)");
@@ -218,20 +233,10 @@ public class Login extends JFrame {
 		contentPane.add(b1);
 		
 		JButton b2 = new JButton("Cancel");
+		b2.setBackground(new Color(255, 0, 0));
 		b2.setFont(new Font("Tahoma", Font.BOLD, 18));
 		b2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-//				tf1.setText("");			
-//				tf2.setText("");
-//				
-////				System.out.print(Gen);
-////				System.out.print(dob);
-////				System.out.print(actype);
-//				tf4.setText("");
-//				tf5.setText("");		
-//				tf6.setText("");
-//				pf1.setText("");
-//				//pf2.setText("");
 				dispose();
 				create c = new create();
 				c.setVisible(true);
@@ -315,7 +320,7 @@ public class Login extends JFrame {
 	
 		 year = new Choice();
 		 year.setFont(new Font("Dialog", Font.BOLD, 16));
-		for(int i=2000;i>=1980;i--)
+		for(int i=2010;i>=1980;i--)
 			year.add(String.valueOf(i));
 		year.setBounds(431, 194, 75, 27);
 		contentPane.add(year);

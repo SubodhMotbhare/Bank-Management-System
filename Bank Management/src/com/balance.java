@@ -78,26 +78,17 @@ public class balance extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 				accountb = abalance.getText();
-				//System.out.print(accountb);
-				//balance = balancetextfield.getText();
 				sql = "SELECT * FROM deposit WHERE account_no =" + accountb ;        
 			    PreparedStatement ps = con.prepareStatement(sql);
-			    //ps.setString(1, "John Smith");
-			    //ps.executeQuery();
-			    
 			    ResultSet rs = (ResultSet) ps.executeQuery();
-			    //System.out.print(rs);
-//			    System.out.print(rs);
-			    //List<String> matchingNames = new ArrayList<>();
 		    while (rs.next())
 			    {
 			         balance = Integer.toString(rs.getInt("amount"));
 			         balancetextfield.setText(balance);
-			         //System.out.print(balance);
 			    }     
 				}
 				catch(Exception e6) {
-					System.out.print(e6);
+					System.out.print(e6.getMessage());
 				}
 			}
 		});

@@ -23,6 +23,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.sql.PreparedStatement;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class deposit extends JFrame {
 
@@ -32,9 +34,35 @@ public class deposit extends JFrame {
 	
 	String sql,find_account,name,accountdum;
 	String account,amount;
+	boolean isValid;
 	/**
 	 * Launch the application.
+	 * @return 
 	 */
+	static Connection con = null;
+	
+	public static void DBop(int account,int amount) {
+		con = (Connection) MysqlCon.dbconnect();
+		try {
+			PreparedStatement pst = con.prepareStatement("select amount from deposit where account_no ="+account);
+			ResultSet rs = (ResultSet) pst.executeQuery();
+			 while (rs.next())
+			    {
+				 int amount1=rs.getInt(1);
+			         PreparedStatement pst12 = con.prepareStatement("update deposit set amount="+(amount1+amount)+" where account_no ="+account);
+			         pst12.executeUpdate();
+			         JOptionPane.showMessageDialog(null, "Your money deposit successfully  balence is="+ (amount1+amount)); 
+			         
+			    }
+
+			}
+			catch(Exception e) {
+				System.out.print(e);
+				JOptionPane.showMessageDialog(null, "Unable to process Your Request");
+		         
+			}
+		
+	}
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -51,10 +79,10 @@ public class deposit extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	Connection con = null;
+	@SuppressWarnings("deprecation")
 	public deposit() {
 		
-		con = (Connection) MysqlCon.dbconnect();
+		
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 590, 414);
@@ -87,42 +115,37 @@ public class deposit extends JFrame {
 		contentPane.add(lblNewLabel_1_2);
 		
 		dtf3 = new JTextField();
+		dtf3.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent arg0) {
+				
+			}
+		});
 		dtf3.setFont(new Font("Tahoma", Font.BOLD, 16));
 		dtf3.setColumns(10);
 		dtf3.setBounds(164, 138, 255, 31);
 		contentPane.add(dtf3);
 		
 		JButton db1 = new JButton("Deposit");
+		
 		db1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
-				try {
-				
-				amount = dtf3.getText();
-				account = dtf2.getText();
-				//System.out.print(account+amount);
-				PreparedStatement pst = con.prepareStatement("select amount from deposit where account_no ="+account);
-//				PreparedStatement ps = con.prepareStatement(sql);
-//				PreparedStatement pst = con.prepareStatement("Insert into deposit values(?,?)");
-				ResultSet rs = (ResultSet) pst.executeQuery();
-//				pst.setInt(1,Integer.parseInt(account));
-//				pst.setInt(2,Integer.parseInt(amount));
-//				pst.executeUpdate();
-				 while (rs.next())
-				    {
-				       int  amount1= rs.getInt("amount");
-				         //System.out.print(amount1);
-				         PreparedStatement pst12 = con.prepareStatement("update deposit set amount="+(amount1+Integer.parseInt(amount))+" where account_no ="+account);
-				         pst12.executeUpdate();
-				         JOptionPane.showMessageDialog(null, "Your money deposit successfully  balence is="+ (amount1+Integer.parseInt(amount))); 
-				         
-				    }
-//				JOptionPane.showMessageDialog(null, "You created account successfully");
-
+				amount=dtf3.getText();
+				int val=0;
+				try {// if is number
+				    val = Integer.parseInt(amount);
+				} catch (NumberFormatException e) {
+				    // else then do blah
+					JOptionPane.showMessageDialog(null, "Enter Valid Amount"); 					
+					return;
 				}
-				catch(Exception e) {
-					System.out.print(e);
+				if(val<0) {
+					JOptionPane.showMessageDialog(null, "Enter Valid Amount");
+				}else {
+					 account=dtf2.getText();
+					deposit.DBop(Integer.parseInt(account),val);
 				}
+				
 			}
 		});
 		db1.setFont(new Font("Tahoma", Font.BOLD, 16));
@@ -147,4 +170,5 @@ public class deposit extends JFrame {
 		 Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(winClosingEvent);
 		 
 		 }
+	
 }
